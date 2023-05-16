@@ -5,6 +5,7 @@ using static UnityEditor.SceneView;
 public class Controller : MonoBehaviour
 {
     private MoveUnit target;
+    private CombatUnit targetCombat;
 
     [Header("Main Menu offset")]
     [SerializeField] private Vector3 _mainPos;
@@ -27,8 +28,6 @@ public class Controller : MonoBehaviour
 
     public float GetH { get { return angleH; } }
 
-    private Camera _camera;
-
     public static Controller instance;
 
     private void Awake()
@@ -44,10 +43,9 @@ public class Controller : MonoBehaviour
     public void AssignTarget(MoveUnit newTarget)
     {
         target = newTarget;
+        targetCombat = newTarget.GetComponent<CombatUnit>();
 
         Cursor.lockState = CursorLockMode.Locked;
-
-        _camera = transform.GetComponent<Camera>();
 
         transform.position = target.transform.position + Quaternion.identity * pivotOffset + Quaternion.identity * camOffset;
         angleH = target.transform.eulerAngles.y;
@@ -67,13 +65,16 @@ public class Controller : MonoBehaviour
         if (target == null)
             return;
         RelocateCamera();
+        ManageAttack();
+        ManageJump();
+        ManageDodge();
     }
 
     private void FixedUpdate()
     {
         if (target == null)
             return;
-        DoControlTarget();
+        ManageMove();
     }
 
     private void RelocateCamera()
@@ -143,7 +144,53 @@ public class Controller : MonoBehaviour
         return true;
     }
 
-    private void DoControlTarget()
+    private void ManageMove()
+    {
+        if (targetCombat && targetCombat.IsAttacking())
+            return;
+        target.DoMove(GetTargetDirection());
+    }
+    
+    private bool ManageDodge()
+    {
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            Vector3 normalizedDir = GetTargetDirection().normalized;
+            target.DoDodge(normalizedDir);
+            return true;
+        }
+        return false;
+    }
+
+    private void ManageJump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+            target.DoJump();
+    }
+
+    private void ManageAttack()
+    {
+        if (targetCombat == null)
+            return;
+        if (Input.GetMouseButtonDown(0) && IsReadyToAttack())
+        {
+            targetCombat.NormalAttack();
+        }
+    }
+
+    private bool IsReadyToAttack()
+    {
+        return !targetCombat.IsAttacking() && !target.IsDodging();
+    }
+
+    public void TargetMainMenu()
+    {
+        transform.position = _mainPos;
+        transform.eulerAngles = _mainRot;
+    }
+
+    private Vector3 GetTargetDirection()
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
@@ -155,16 +202,6 @@ public class Controller : MonoBehaviour
         Vector3 inputDir = Vector3.ClampMagnitude(new Vector3(h, v, 0), 1);
 
         Vector3 right = new Vector3(forward.z, 0, -forward.x);
-        Vector3 targetDirection = forward * inputDir.y + right * inputDir.x;
-
-        target.DoMove(targetDirection);
+        return forward * inputDir.y + right * inputDir.x;
     }
-
-    public void TargetMainMenu()
-    {
-        transform.position = _mainPos;
-        transform.eulerAngles = _mainRot;
-    }
-
-
 }

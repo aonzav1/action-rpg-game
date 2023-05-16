@@ -6,16 +6,23 @@ using FishNet.Object.Synchronizing;
 
 public class Entity : NetworkBehaviour
 {
+    public GameObject _character;
+
     [Header("Stats")]
     [SerializeField] private int maxHP;
     [SerializeField] private int maxMP;
-    [SerializeField] private float speed;
-    [SerializeField] private float turnRate;
 
     [SyncVar]
     private int HP;
     [SyncVar]
     private int MP;
+
+    private Animator _animator;
+
+    private void Awake()
+    {
+        _animator = _character.GetComponent<Animator>();
+    }
 
     public override void OnStartServer()
     {
@@ -29,13 +36,19 @@ public class Entity : NetworkBehaviour
         MP = maxMP;
     }
 
-    public float GetSpeed()
+    private void Update()
     {
-        return speed;
+        _character.transform.localPosition = new Vector3(0, _character.transform.localPosition.y, 0);
     }
 
-    public float GetTurnRate()
+
+    public Animator GetAnim()
     {
-        return turnRate;
+        return _animator;
+    }
+
+    public Transform GetCharacterTransform()
+    {
+        return _character.transform;
     }
 }

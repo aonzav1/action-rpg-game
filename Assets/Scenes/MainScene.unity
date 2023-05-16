@@ -303,7 +303,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d33fa9c94957ac249a738eb854c63466, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveRate: 4
   _mainPos: {x: 0, y: 6.26, z: -13.34}
   _mainRot: {x: 23, y: 0, z: 0}
   smooth: 10
