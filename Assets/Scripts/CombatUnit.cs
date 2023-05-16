@@ -8,6 +8,7 @@ public class CombatUnit : NetworkBehaviour
     private Entity _entity;
     private bool isAttacking;
 
+
     private void Awake()
     {
         _entity = GetComponent<Entity>();

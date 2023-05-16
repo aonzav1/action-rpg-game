@@ -75,7 +75,7 @@ MonoBehaviour:
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 5912153048566585907
+  <AssetPathHash>k__BackingField: 7807759643866311769
   _sceneNetworkObjects: []
 --- !u!114 &6420552185407096997
 MonoBehaviour:
@@ -173,8 +173,12 @@ MonoBehaviour:
   _character: {fileID: 5330951998444030319}
   maxHP: 100
   maxMP: 100
-  HP: 0
-  MP: 0
+  mpRegenPerTick: 20
+  mpRegenInterval: 3
+  maxStamina: 100
+  staminaRegenPerTick: 15
+  staminaRegenInterval: 1.25
+  hp: 0
 --- !u!114 &5531959172837638339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,6 +200,8 @@ MonoBehaviour:
   jumpForce: 8000
   dodgeSpeed: 8
   dodgeTime: 0.85
+  jumpCost: 10
+  dodgeCost: 15
 --- !u!114 &7558451477318878703
 MonoBehaviour:
   m_ObjectHideFlags: 0

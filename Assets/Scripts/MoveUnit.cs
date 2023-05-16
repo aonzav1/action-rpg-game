@@ -18,6 +18,9 @@ public class MoveUnit : NetworkBehaviour
     [SerializeField] private float dodgeSpeed = 15;
     [SerializeField] private float dodgeTime = 0.5f;
 
+    [SerializeField] private float jumpCost = 10;
+    [SerializeField] private float dodgeCost = 15;
+
     private Rigidbody _rigidbody;
     private Entity _entity;
     private Collider _collider;
@@ -123,6 +126,9 @@ public class MoveUnit : NetworkBehaviour
         if (!IsGrounded() || isDodging)
             return;
 
+        if (!_entity.ConsumeStamina(jumpCost))
+            return;
+
         _rigidbody.AddForce(0, jumpForce, 0);
         ShowJumpAnimation();
     }
@@ -136,6 +142,9 @@ public class MoveUnit : NetworkBehaviour
     private void Dodge(Vector3 targetDir)
     {
         if (!IsGrounded() || isDodging)
+            return;
+
+        if (!_entity.ConsumeStamina(dodgeCost))
             return;
 
         if (targetDir.magnitude <= 0.01f)
