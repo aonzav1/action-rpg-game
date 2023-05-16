@@ -5,6 +5,8 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine.Events;
 
+public enum EntityState { live, stunned, dead}
+
 public class Entity : NetworkBehaviour
 {
     public GameObject _character;
@@ -27,6 +29,8 @@ public class Entity : NetworkBehaviour
 
     private float staminaRegenTimer = 0;
     private float mpRegenTimer = 0;
+
+    private EntityState _state;
 
     public UnityAction<float> OnHealthChanged;
     public UnityAction<float> OnManaChanged;
@@ -51,7 +55,6 @@ public class Entity : NetworkBehaviour
             ResetManaRegenTimer();
         }
     }
-
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -89,6 +92,7 @@ public class Entity : NetworkBehaviour
         }
     }
 
+
     public void RegenStamina()
     {
         ResetStaminaRegenTimer();
@@ -101,7 +105,6 @@ public class Entity : NetworkBehaviour
     {
         staminaRegenTimer = staminaRegenInterval;
     }
-
     public void RegenMana()
     {
         ResetManaRegenTimer();
@@ -114,6 +117,7 @@ public class Entity : NetworkBehaviour
     {
         mpRegenTimer = mpRegenInterval;
     }
+
 
     public bool ConsumeStamina(float amount)
     {
@@ -137,6 +141,7 @@ public class Entity : NetworkBehaviour
         return true;
     }
 
+
     private void UpdateStaminaGauge()
     {
         OnStaminaChanged?.Invoke(stamina / maxStamina);
@@ -155,9 +160,33 @@ public class Entity : NetworkBehaviour
     {
         return _animator;
     }
-
     public Transform GetCharacterTransform()
     {
         return _character.transform;
+    }
+
+    public void GetHit(float damage,Entity attacker)
+    {
+        Debug.Log("Get hit: " + damage + " damage by "+attacker.gameObject.name);
+        _animator.Play("GetHit");
+        hp -= damage;
+        if (hp <= 0)
+        {
+            Die();
+        }
+        UpdateHealthGauge();
+        Debug.Log(hp+" left");
+    }
+
+    private void Die()
+    {
+        _animator.Play("Death");
+        Debug.Log("Die");
+        _state = EntityState.dead;
+    }
+
+    public EntityState GetState()
+    {
+        return _state;
     }
 }
