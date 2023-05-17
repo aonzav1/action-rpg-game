@@ -1,6 +1,5 @@
-using FishNet.Object;
+
 using UnityEngine;
-using static UnityEditor.SceneView;
 
 public class Controller : MonoBehaviour
 {
@@ -64,6 +63,15 @@ public class Controller : MonoBehaviour
     {
         if (target == null)
             return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(Cursor.lockState == CursorLockMode.None)
+                Cursor.lockState = CursorLockMode.Locked;
+            else
+                Cursor.lockState = CursorLockMode.None;
+        }
+
         RelocateCamera();
         ManageAttack();
         ManageJump();
@@ -151,20 +159,21 @@ public class Controller : MonoBehaviour
         target.DoMove(GetTargetDirection());
     }
     
-    private bool ManageDodge()
+    private void ManageDodge()
     {
-
+        if (targetCombat && !targetCombat.IsReadyToAttack())
+            return;
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             Vector3 normalizedDir = GetTargetDirection().normalized;
             target.DoDodge(normalizedDir);
-            return true;
         }
-        return false;
     }
 
     private void ManageJump()
     {
+        if (targetCombat && !targetCombat.IsReadyToAttack())
+            return;
         if (Input.GetKeyDown(KeyCode.Space))
             target.DoJump();
     }
@@ -177,19 +186,19 @@ public class Controller : MonoBehaviour
             return;
         if (Input.GetMouseButtonDown(0))
         {
-            targetCombat.NormalAttack();
+            targetCombat.RequestAttack(0);
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            targetCombat.SpecialAttack(1);
+            targetCombat.RequestAttack(1);
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            targetCombat.SpecialAttack(2);
+            targetCombat.RequestAttack(2);
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            targetCombat.SpecialAttack(3);
+            targetCombat.RequestAttack(3);
         }
     }
 

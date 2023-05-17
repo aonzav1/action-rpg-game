@@ -4,6 +4,7 @@ using FishNet.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
@@ -46,8 +47,21 @@ public class CombatUnit : NetworkBehaviour
     {
         return !isAttacking && _entity.IsControllable();
     }
+    [ServerRpc]
+    public void RequestAttack(int num)
+    {
+        if(num == 0)
+        {
+            NormalAttack();
+        }
+        else
+        {
+            SpecialAttack(num);
+        }
+    }
 
-    [ObserversRpc]
+
+    [ObserversRpc(RunLocally = true)]
     public virtual void NormalAttack()
     {
         _entity.GetAnim().Play("Attack");
@@ -55,7 +69,7 @@ public class CombatUnit : NetworkBehaviour
         StartCoroutine(DoAttackSteps(normalAttack));
     }
 
-    [ObserversRpc]
+    [ObserversRpc(RunLocally = true)]
     public virtual void SpecialAttack(int num)
     {
         _entity.GetAnim().Play("Attack_"+num);
@@ -95,8 +109,10 @@ public class CombatUnit : NetworkBehaviour
         isAttacking = false;
     }
 
+    [ServerRpc]
     public void SpawnProjectile(GameObject target)
     {
+        Debug.Log("Received spawn projectile");
         NetworkObject nob = _networkManager.GetPooledInstantiated(target, true);
         nob.transform.SetPositionAndRotation(fireTransform.position, fireTransform.rotation);
         _networkManager.ServerManager.Spawn(nob,base.Owner);

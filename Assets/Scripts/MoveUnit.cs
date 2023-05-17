@@ -9,8 +9,6 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 public class MoveUnit : NetworkBehaviour
 {
-    [SerializeField]
-    private bool _clientAuth = true;
 
     [SerializeField] private float speed = 4;
     [SerializeField] private float turnRate = 0.15f;
@@ -31,8 +29,10 @@ public class MoveUnit : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if(base.IsOwner)
+        if (base.IsOwner)
             Controller.Get().AssignTarget(this);
+        else
+            _rigidbody.useGravity = false;
     }
     public override void OnStopClient()
     {
@@ -54,10 +54,13 @@ public class MoveUnit : NetworkBehaviour
         {
             _collider.enabled = false;
             _rigidbody.useGravity = false;
+            _rigidbody.isKinematic = true;
             return;
         }
 
         _collider.enabled = !isDodging;
+        if (!base.IsOwner && !base.IsServer)
+            return;
         _rigidbody.useGravity = !isDodging;
 
         _entity.GetAnim().SetBool("isGrounded", IsGrounded());
@@ -65,31 +68,20 @@ public class MoveUnit : NetworkBehaviour
 
     public void DoMove(Vector3 targetDir)
     {
-        if (_clientAuth)
-            Move(targetDir);
-        else
-            ServerMove(targetDir);
+        Move(targetDir);
     }
     public void DoJump()
     {
-        if (_clientAuth)
-            Jump();
+        Jump();
     }
     public void DoDodge(Vector3 targetDir)
     {
-        if (_clientAuth)
-            Dodge(targetDir);
+        Dodge(targetDir);
     }
 
     private bool IsGrounded()
     {
         return Physics.Linecast(transform.position + new Vector3(0f, 0.3f, 0f), transform.position - (Vector3.one * 0.5f));
-    }
-
-    [ServerRpc]
-    private void ServerMove(Vector3 targetDir)
-    {
-        Move(targetDir);
     }
 
     private void Move(Vector3 targetDir)
@@ -131,10 +123,16 @@ public class MoveUnit : NetworkBehaviour
             return;
 
         _rigidbody.AddForce(0, jumpForce, 0);
+        RequestJump();
+    }
+
+    [ServerRpc]
+    private void RequestJump()
+    {
         ShowJumpAnimation();
     }
 
-    [ObserversRpc]
+    [ObserversRpc(RunLocally = true)]
     private void ShowJumpAnimation()
     {
         _entity.GetAnim().Play("Jump");
@@ -158,7 +156,7 @@ public class MoveUnit : NetworkBehaviour
         }
         _rigidbody.velocity = targetDir * dodgeSpeed;
         StartCoroutine(DodgeScenario());
-        ShowDodgeAnimation();
+        RequestDodge();
     }
 
     IEnumerator DodgeScenario()
@@ -177,8 +175,13 @@ public class MoveUnit : NetworkBehaviour
         _rigidbody.angularVelocity = Vector3.zero;
         _rigidbody.velocity = Vector3.zero;
     }
+    [ServerRpc]
+    private void RequestDodge()
+    {
+        ShowDodgeAnimation();
+    }
 
-    [ObserversRpc]
+    [ObserversRpc(RunLocally =true)]
     private void ShowDodgeAnimation()
     {
         _entity.GetAnim().Play("Dodge");

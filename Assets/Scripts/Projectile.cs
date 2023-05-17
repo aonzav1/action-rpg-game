@@ -16,6 +16,8 @@ public class Projectile : NetworkBehaviour
     private Entity ownerEntity;
     private float currentTimer = 0;
 
+    List<GameObject> hits = new List<GameObject>();
+
     private void Awake()
     {
         _rigidBody = GetComponent<Rigidbody>();
@@ -58,6 +60,27 @@ public class Projectile : NetworkBehaviour
         {
             if (en == ownerEntity)
                 return;
+            en.GetHit(damage, Vector3.zero, ownerEntity);
+        }
+        if (destroyOnHit)
+        {
+            DeactiveThis();
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        if (!base.IsOwner)
+            return;
+
+        Entity en = other.GetComponent<Entity>();
+
+        if (en != null)
+        {
+            if (en == ownerEntity)
+                return;
+            if (hits.Contains(other.gameObject))
+                return;
+            hits.Add(other.gameObject);
             en.GetHit(damage, Vector3.zero, ownerEntity);
         }
         if (destroyOnHit)

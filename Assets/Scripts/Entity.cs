@@ -4,6 +4,7 @@ using UnityEngine;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine.Events;
+using FishNet.Connection;
 
 public enum EntityState { live, dead}
 
@@ -22,8 +23,14 @@ public class Entity : NetworkBehaviour
 
     [SyncVar]
     private float hp;
+    [SyncVar]
     private float mp;
+    [SyncVar]
     private float stamina;
+
+    private float _prevHp;
+    private float _prevMp;
+    private float _prevStamina;
 
     private Animator _animator;
     private Rigidbody _rigidbody;
@@ -53,9 +60,6 @@ public class Entity : NetworkBehaviour
         if (base.IsOwner)
         {
             UIManager.Get().AssignTracker(this);
-            UpdateHealthGauge();
-            UpdateManaGauge();
-            UpdateStaminaGauge();
 
             ResetStaminaRegenTimer();
             ResetManaRegenTimer();
@@ -74,10 +78,6 @@ public class Entity : NetworkBehaviour
         hp = maxHP;
         mp = maxMP;
         stamina = maxStamina;
-
-        UpdateHealthGauge();
-        UpdateManaGauge();
-        UpdateStaminaGauge();
     }
 
     private void Update()
@@ -103,6 +103,9 @@ public class Entity : NetworkBehaviour
         {
             RegenMana();
         }
+        UpdateHealthGauge();
+        UpdateManaGauge();
+        UpdateStaminaGauge();
     }
 
 
@@ -112,7 +115,6 @@ public class Entity : NetworkBehaviour
         stamina += staminaRegenPerTick;
         if (stamina > maxStamina)
             stamina = maxStamina;
-        UpdateStaminaGauge();
     }
     private void ResetStaminaRegenTimer()
     {
@@ -124,7 +126,6 @@ public class Entity : NetworkBehaviour
         mp += mpRegenPerTick;
         if (mp > maxMP)
             mp = maxMP;
-        UpdateManaGauge();
     }
     private void ResetManaRegenTimer()
     {
@@ -157,14 +158,23 @@ public class Entity : NetworkBehaviour
 
     private void UpdateStaminaGauge()
     {
+        if (stamina == _prevStamina)
+            return;
+        _prevStamina = stamina;
         OnStaminaChanged?.Invoke(stamina / maxStamina);
     }
     private void UpdateManaGauge()
     {
+        if (mp == _prevMp)
+            return;
+        _prevMp = mp;
         OnManaChanged?.Invoke(mp / maxMP);
     }
     private void UpdateHealthGauge()
     {
+        if (hp == _prevHp)
+            return;
+        _prevHp = hp;
         OnHealthChanged?.Invoke(hp / maxHP);
     }
 
@@ -182,23 +192,31 @@ public class Entity : NetworkBehaviour
     public void GetHit(float damage, Vector3 force,Entity attacker, bool isHeavy =false)
     {
         Debug.Log("Get hit: " + damage + " damage by "+attacker.gameObject.name);
-
-        if (isHeavy)
-        {
-            stunDuration = 2.5f;
-        }
+        DisplayHitEffect(isHeavy);
 
         _rigidbody.AddForce(force);
+        if (isHeavy)
+            stunDuration = 2.5f;
+
+        DealForce(base.Owner,force, isHeavy);
+
         hp -= damage;
+
         if (hp <= 0)
         {
             Die();
         }
-        DisplayHitEffect(hp, isHeavy);
+    }
+    [TargetRpc]
+    private void DealForce(NetworkConnection conn,Vector3 force, bool isHeavy)
+    {
+        _rigidbody.AddForce(force);
+        if(isHeavy)
+            stunDuration = 2.5f;
     }
 
-    [ObserversRpc]
-    public void DisplayHitEffect(float syncHP,bool isHeavy)
+    [ObserversRpc(RunLocally =true)]
+    private void DisplayHitEffect(bool isHeavy)
     {
         if (isHeavy)
         {
@@ -208,23 +226,12 @@ public class Entity : NetworkBehaviour
         {
             _animator.Play("GetHit");
         }
-        //Just to make sure hp update in-time
-        hp = syncHP;
-
-        if(base.IsOwner)
-            UpdateHealthGauge();
     }
 
-    [Server]
     private void Die()
     {
-        PlayDeathAnim();
+        _animator.SetBool("isDie", true);
         _state = EntityState.dead;
-    }
-    [ObserversRpc]
-    public void PlayDeathAnim()
-    {
-        _animator.Play("Death");
     }
 
     public bool IsDie()
