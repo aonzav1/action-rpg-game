@@ -3379,8 +3379,8 @@ MonoBehaviour:
   <SceneId>k__BackingField: 356921453107480612
   <AssetPathHash>k__BackingField: 0
   _sceneNetworkObjects:
-  - {fileID: 1539523464}
   - {fileID: 1260646526}
+  - {fileID: 1539523464}
 --- !u!4 &1260646527
 Transform:
   m_ObjectHideFlags: 0
@@ -4286,6 +4286,8 @@ MonoBehaviour:
   _networkBehaviours:
   - {fileID: 1539523465}
   - {fileID: 1539523467}
+  - {fileID: 2686890239818448528}
+  - {fileID: 2686890239818448527}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
@@ -4299,8 +4301,8 @@ MonoBehaviour:
   <SceneId>k__BackingField: 356921453510994769
   <AssetPathHash>k__BackingField: 0
   _sceneNetworkObjects:
-  - {fileID: 1539523464}
   - {fileID: 1260646526}
+  - {fileID: 1539523464}
 --- !u!114 &1539523465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4317,7 +4319,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1539523464}
   _networkObjectCache: {fileID: 1539523464}
   _character: {fileID: 1385839344}
-  maxHP: 100
+  maxHP: 999
   maxMP: 100
   mpRegenPerTick: 40
   mpRegenInterval: 5
@@ -4325,6 +4327,7 @@ MonoBehaviour:
   staminaRegenPerTick: 25
   staminaRegenInterval: 3
   hp: 0
+  _state: 0
 --- !u!114 &1539523467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4354,7 +4357,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2686890239818448526}
   serializedVersion: 4
-  m_Mass: 24
+  m_Mass: 20
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -6048,6 +6051,8 @@ GameObject:
   - component: {fileID: 1539523467}
   - component: {fileID: 1539523468}
   - component: {fileID: 1539523469}
+  - component: {fileID: 2686890239818448528}
+  - component: {fileID: 2686890239818448527}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Untagged
@@ -6055,3 +6060,50 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &2686890239818448527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2686890239818448526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0c21f92f6f4f074daf496ebaa3149a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 1539523464}
+  _networkObjectCache: {fileID: 1539523464}
+  attackTransform: {fileID: 0}
+  fireTransform: {fileID: 0}
+  normalAttack:
+    attackName: 
+    toggleObject: {fileID: 0}
+    pre_delay: 0
+    post_delay: 0
+    attackSteps: []
+  specialAttack: []
+--- !u!114 &2686890239818448528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2686890239818448526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a6e63a8160de9f49a37e7db9533a677, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 1539523464}
+  _networkObjectCache: {fileID: 1539523464}
+  _clientAuth: 0
+  speed: 4
+  turnRate: 0.15
+  jumpForce: 250
+  dodgeSpeed: 15
+  dodgeTime: 0.5
+  jumpCost: 10
+  dodgeCost: 15

@@ -1,3 +1,5 @@
+using FishNet;
+using FishNet.Managing;
 using FishNet.Object;
 using System;
 using System.Collections;
@@ -17,33 +19,39 @@ public struct Attack
 public struct AttackTimeStep
 {
     public GameObject toggleObject;
-    //public float damage;
+    public GameObject projectile;
+
     public float duration;
 }
 
 public class CombatUnit : NetworkBehaviour
 {
+    [SerializeField] private Transform attackTransform;
+    [SerializeField] private Transform fireTransform;
     [SerializeField] private Attack normalAttack;
     [SerializeField] private Attack[] specialAttack;
 
     private Entity _entity;
     private bool isAttacking;
+    private NetworkManager _networkManager;
 
 
     private void Awake()
     {
         _entity = GetComponent<Entity>();
+        _networkManager = InstanceFinder.NetworkManager;
     }
 
-    public bool IsAttacking()
+    public bool IsReadyToAttack()
     {
-        return isAttacking;
+        return !isAttacking && _entity.IsControllable();
     }
 
     [ObserversRpc]
     public virtual void NormalAttack()
     {
         _entity.GetAnim().Play("Attack");
+        attackTransform.transform.rotation = _entity.GetCharacterTransform().rotation;
         StartCoroutine(DoAttackSteps(normalAttack));
     }
 
@@ -51,6 +59,8 @@ public class CombatUnit : NetworkBehaviour
     public virtual void SpecialAttack(int num)
     {
         _entity.GetAnim().Play("Attack_"+num);
+        attackTransform.transform.rotation = _entity.GetCharacterTransform().rotation;
+        StartCoroutine(DoAttackSteps(specialAttack[num-1]));
     }
 
     IEnumerator DoAttackSteps(Attack attack)
@@ -68,6 +78,9 @@ public class CombatUnit : NetworkBehaviour
             if (toggleObject)
                 toggleObject.SetActive(true);
 
+            if (base.IsOwner && attack.attackSteps[i].projectile)
+                SpawnProjectile(attack.attackSteps[i].projectile);
+
             yield return new WaitForSeconds(attack.attackSteps[i].duration);
 
             if(toggleObject)
@@ -80,5 +93,12 @@ public class CombatUnit : NetworkBehaviour
         yield return new WaitForSeconds(attack.post_delay);
 
         isAttacking = false;
+    }
+
+    public void SpawnProjectile(GameObject target)
+    {
+        NetworkObject nob = _networkManager.GetPooledInstantiated(target, true);
+        nob.transform.SetPositionAndRotation(fireTransform.position, fireTransform.rotation);
+        _networkManager.ServerManager.Spawn(nob,base.Owner);
     }
 }

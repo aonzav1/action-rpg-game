@@ -146,7 +146,7 @@ public class Controller : MonoBehaviour
 
     private void ManageMove()
     {
-        if (targetCombat && targetCombat.IsAttacking())
+        if (targetCombat && !targetCombat.IsReadyToAttack())
             return;
         target.DoMove(GetTargetDirection());
     }
@@ -173,15 +173,29 @@ public class Controller : MonoBehaviour
     {
         if (targetCombat == null)
             return;
-        if (Input.GetMouseButtonDown(0) && IsReadyToAttack())
+        if (!IsReadyToAttack())
+            return;
+        if (Input.GetMouseButtonDown(0))
         {
             targetCombat.NormalAttack();
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            targetCombat.SpecialAttack(1);
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            targetCombat.SpecialAttack(2);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            targetCombat.SpecialAttack(3);
         }
     }
 
     private bool IsReadyToAttack()
     {
-        return !targetCombat.IsAttacking() && !target.IsDodging();
+        return targetCombat.IsReadyToAttack() && !target.IsDodging();
     }
 
     public void TargetMainMenu()

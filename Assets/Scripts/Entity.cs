@@ -5,7 +5,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine.Events;
 
-public enum EntityState { live, stunned, dead}
+public enum EntityState { live, dead}
 
 public class Entity : NetworkBehaviour
 {
@@ -26,19 +26,25 @@ public class Entity : NetworkBehaviour
     private float stamina;
 
     private Animator _animator;
+    private Rigidbody _rigidbody;
 
     private float staminaRegenTimer = 0;
     private float mpRegenTimer = 0;
+    private float stunDuration = 0;
 
+    [SyncVar]
     private EntityState _state;
 
     public UnityAction<float> OnHealthChanged;
     public UnityAction<float> OnManaChanged;
     public UnityAction<float> OnStaminaChanged;
 
+    public static Entity controllingEntity;
+
     private void Awake()
     {
         _animator = _character.GetComponent<Animator>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     public override void OnStartClient()
@@ -53,6 +59,8 @@ public class Entity : NetworkBehaviour
 
             ResetStaminaRegenTimer();
             ResetManaRegenTimer();
+
+            controllingEntity = this;
         }
     }
     public override void OnStartServer()
@@ -81,6 +89,11 @@ public class Entity : NetworkBehaviour
 
         staminaRegenTimer -= Time.deltaTime;
         mpRegenTimer -= Time.deltaTime;
+
+        if (stunDuration > 0)
+        {
+            stunDuration -= Time.deltaTime;
+        }
 
         if (staminaRegenTimer <= 0)
         {
@@ -165,28 +178,61 @@ public class Entity : NetworkBehaviour
         return _character.transform;
     }
 
-    public void GetHit(float damage,Entity attacker)
+    [ServerRpc(RequireOwnership =false)]
+    public void GetHit(float damage, Vector3 force,Entity attacker, bool isHeavy =false)
     {
         Debug.Log("Get hit: " + damage + " damage by "+attacker.gameObject.name);
-        _animator.Play("GetHit");
+
+        if (isHeavy)
+        {
+            stunDuration = 2.5f;
+        }
+
+        _rigidbody.AddForce(force);
         hp -= damage;
         if (hp <= 0)
         {
             Die();
         }
-        UpdateHealthGauge();
-        Debug.Log(hp+" left");
+        DisplayHitEffect(hp, isHeavy);
     }
 
+    [ObserversRpc]
+    public void DisplayHitEffect(float syncHP,bool isHeavy)
+    {
+        if (isHeavy)
+        {
+            _animator.Play("GetHeavyHit");
+        }
+        else
+        {
+            _animator.Play("GetHit");
+        }
+        //Just to make sure hp update in-time
+        hp = syncHP;
+
+        if(base.IsOwner)
+            UpdateHealthGauge();
+    }
+
+    [Server]
     private void Die()
     {
-        _animator.Play("Death");
-        Debug.Log("Die");
+        PlayDeathAnim();
         _state = EntityState.dead;
     }
-
-    public EntityState GetState()
+    [ObserversRpc]
+    public void PlayDeathAnim()
     {
-        return _state;
+        _animator.Play("Death");
+    }
+
+    public bool IsDie()
+    {
+        return _state == EntityState.dead;
+    }
+    public bool IsControllable()
+    {
+        return _state == EntityState.live && stunDuration <= 0;
     }
 }

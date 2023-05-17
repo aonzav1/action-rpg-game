@@ -43,23 +43,24 @@ public class MoveUnit : NetworkBehaviour
 
     private void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
         _entity = GetComponent<Entity>();
+        _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
     }
 
     private void Update()
     {
+        if(_entity.IsDie())
+        {
+            _collider.enabled = false;
+            _rigidbody.useGravity = false;
+            return;
+        }
+
         _collider.enabled = !isDodging;
         _rigidbody.useGravity = !isDodging;
 
-        if (!base.IsOwner)
-            return;
-
-        if (_clientAuth || (!_clientAuth && base.IsServer))
-        {
-            _entity.GetAnim().SetBool("isGrounded", IsGrounded());
-        }
+        _entity.GetAnim().SetBool("isGrounded", IsGrounded());
     }
 
     public void DoMove(Vector3 targetDir)
@@ -93,7 +94,7 @@ public class MoveUnit : NetworkBehaviour
 
     private void Move(Vector3 targetDir)
     {
-        if (isDodging)
+        if (isDodging || !_entity.IsControllable())
             return;
 
         transform.Translate(targetDir*speed * Time.deltaTime);
@@ -123,7 +124,7 @@ public class MoveUnit : NetworkBehaviour
 
     private void Jump()
     {
-        if (!IsGrounded() || isDodging)
+        if (!IsGrounded() || isDodging || !_entity.IsControllable())
             return;
 
         if (!_entity.ConsumeStamina(jumpCost))
@@ -141,7 +142,7 @@ public class MoveUnit : NetworkBehaviour
 
     private void Dodge(Vector3 targetDir)
     {
-        if (!IsGrounded() || isDodging)
+        if (!IsGrounded() || isDodging || !_entity.IsControllable())
             return;
 
         if (!_entity.ConsumeStamina(dodgeCost))
