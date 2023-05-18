@@ -31,7 +31,7 @@ public class HitBox : NetworkBehaviour
 
         hits.Add(other.gameObject);
 
-        if (!base.IsOwner)
+        if (!base.IsServer)
             return;
         
         en.GetHit(damage, CalculateHitForce(other.transform.position), entity,isHeavy);

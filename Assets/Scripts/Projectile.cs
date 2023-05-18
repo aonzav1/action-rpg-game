@@ -23,10 +23,9 @@ public class Projectile : NetworkBehaviour
         _rigidBody = GetComponent<Rigidbody>();
     }
 
-    public override void OnStartClient()
+    public void SetOwner(Entity shooter)
     {
-        base.OnStartClient();
-        ownerEntity = Entity.controllingEntity;
+        ownerEntity = shooter;
     }
 
     private void Start()
@@ -49,9 +48,10 @@ public class Projectile : NetworkBehaviour
         }
     }
 
+    //For once-hit target (IsTrigger = false)
     private void OnCollisionEnter(Collision collision)
     {
-        if (!base.IsOwner)
+        if (!base.IsServer)
             return;
 
         Entity en = collision.gameObject.GetComponent<Entity>();
@@ -67,9 +67,11 @@ public class Projectile : NetworkBehaviour
             DeactiveThis();
         }
     }
+
+    //Support multitarget (IsTrigger = true)
     private void OnTriggerStay(Collider other)
     {
-        if (!base.IsOwner)
+        if (!base.IsServer)
             return;
 
         Entity en = other.GetComponent<Entity>();
@@ -91,6 +93,10 @@ public class Projectile : NetworkBehaviour
 
     private void DeactiveThis()
     {
-        Destroy(gameObject);
+        if (!base.IsDeinitializing)
+        {
+            Debug.Log("Despawn");
+            base.Despawn(gameObject);
+        }
     }
 }

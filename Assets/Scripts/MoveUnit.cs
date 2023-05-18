@@ -70,6 +70,10 @@ public class MoveUnit : NetworkBehaviour
     {
         Move(targetDir);
     }
+    public void DoRotate(Vector3 targetDir)
+    {
+        Rotating(targetDir,false);
+    }
     public void DoJump()
     {
         Jump();
@@ -126,7 +130,7 @@ public class MoveUnit : NetworkBehaviour
         RequestJump();
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership =false)]
     private void RequestJump()
     {
         ShowJumpAnimation();
@@ -175,7 +179,7 @@ public class MoveUnit : NetworkBehaviour
         _rigidbody.angularVelocity = Vector3.zero;
         _rigidbody.velocity = Vector3.zero;
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void RequestDodge()
     {
         ShowDodgeAnimation();

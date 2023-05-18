@@ -16,7 +16,7 @@ public class HPBar : MonoBehaviour
     public void UpdateBar(float percent)
     {
         fillImage.fillAmount = percent;
-        fillImage.gameObject.SetActive(percent <= 0);
+        fillImage.transform.parent.gameObject.SetActive(percent > 0);
     }
     private void OnDestroy()
     {

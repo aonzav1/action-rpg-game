@@ -86,16 +86,16 @@ public class Entity : NetworkBehaviour
 
         UpdateHealthGauge();
 
+        if (stunDuration > 0)
+        {
+            stunDuration -= Time.deltaTime;
+        }
+
         if (!base.IsOwner)
             return;
 
         staminaRegenTimer -= Time.deltaTime;
         mpRegenTimer -= Time.deltaTime;
-
-        if (stunDuration > 0)
-        {
-            stunDuration -= Time.deltaTime;
-        }
 
         if (staminaRegenTimer <= 0)
         {
@@ -189,7 +189,7 @@ public class Entity : NetworkBehaviour
         return _character.transform;
     }
 
-    [ServerRpc(RequireOwnership =false)]
+    [Server]
     public void GetHit(float damage, Vector3 force,Entity attacker, bool isHeavy =false)
     {
         Debug.Log("Get hit: " + damage + " damage by "+attacker.gameObject.name);

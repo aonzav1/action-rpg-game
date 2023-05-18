@@ -47,10 +47,11 @@ public class CombatUnit : NetworkBehaviour
     {
         return !isAttacking && _entity.IsControllable();
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership =false)]
     public void RequestAttack(int num)
     {
-        if(num == 0)
+        isAttacking = true; 
+        if (num == 0)
         {
             NormalAttack();
         }
@@ -73,7 +74,7 @@ public class CombatUnit : NetworkBehaviour
     public virtual void SpecialAttack(int num)
     {
         _entity.GetAnim().Play("Attack_"+num);
-        attackTransform.transform.rotation = _entity.GetCharacterTransform().rotation;
+        UpdateAttackTransformRotation();
         StartCoroutine(DoAttackSteps(specialAttack[num-1]));
     }
 
@@ -88,11 +89,12 @@ public class CombatUnit : NetworkBehaviour
 
         for (int i = 0; i < attack.attackSteps.Length; i++)
         {
+            UpdateAttackTransformRotation();
             GameObject toggleObject = attack.attackSteps[i].toggleObject;
             if (toggleObject)
                 toggleObject.SetActive(true);
 
-            if (base.IsOwner && attack.attackSteps[i].projectile)
+            if (base.IsServer && attack.attackSteps[i].projectile)
                 SpawnProjectile(attack.attackSteps[i].projectile);
 
             yield return new WaitForSeconds(attack.attackSteps[i].duration);
@@ -109,12 +111,23 @@ public class CombatUnit : NetworkBehaviour
         isAttacking = false;
     }
 
-    [ServerRpc]
+    private void UpdateAttackTransformRotation()
+    {
+        attackTransform.transform.rotation = _entity.GetCharacterTransform().rotation;
+    }
+
+    [Server]
     public void SpawnProjectile(GameObject target)
     {
         Debug.Log("Received spawn projectile");
         NetworkObject nob = _networkManager.GetPooledInstantiated(target, true);
         nob.transform.SetPositionAndRotation(fireTransform.position, fireTransform.rotation);
+        nob.GetComponent<Projectile>().SetOwner(_entity);
         _networkManager.ServerManager.Spawn(nob,base.Owner);
+    }
+
+    public bool IsAttacking()
+    {
+        return isAttacking;
     }
 }
