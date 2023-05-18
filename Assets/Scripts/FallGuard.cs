@@ -5,6 +5,7 @@ using FishNet.Object;
 
 public class FallGuard : NetworkBehaviour
 {
+    [SerializeField] private bool clientAuthority = true;
     [SerializeField] private float fallTheshold = -5f;
     private Vector3 spawnPoint;
 
@@ -13,10 +14,11 @@ public class FallGuard : NetworkBehaviour
         spawnPoint = transform.position;
     }
 
-
     void Update()
     {
-        if (!base.IsOwner)
+        if (clientAuthority && !base.IsOwner)
+            return;
+        if (!clientAuthority && !base.IsServer)
             return;
 
         if (transform.position.y < fallTheshold)

@@ -20,11 +20,13 @@ public class SimpleAI : NetworkBehaviour
 
     [Header("Attack")]
     [SerializeField] private float normalAttackRange;
+    [SerializeField] private float normalAttackCD;
     [SerializeField] private float specialAttackRange;
     [SerializeField] private float skill_1_CD;
     [SerializeField] private float skill_2_CD;
     [SerializeField] private float skill_3_CD;
     [SerializeField] private float dodge_CD;
+    private float attack_cur_CD;
     private float skill_cur_CD;
     private float dodge_cur_CD;
 
@@ -57,7 +59,7 @@ public class SimpleAI : NetworkBehaviour
             target = SeekNewTarget();
             if(target == null && detected == null)
             {
-                isActive = false;
+                StopMove();
                 return;
             }
             knittingTime = maxKnittingTime;
@@ -74,6 +76,11 @@ public class SimpleAI : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (!base.IsServer)
+            return;
+        if (!isActive)
+            return;
+
         if (target == null)
             return;
 
@@ -153,7 +160,6 @@ public class SimpleAI : NetworkBehaviour
         {
             if (isCharging)
             {
-                Debug.Log("Do rotate");
                 moveUnit.DoRotate(dir);
             }
             return;
@@ -202,7 +208,9 @@ public class SimpleAI : NetworkBehaviour
     private void TryAttackPlayer()
     {
         if (!combatUnit.IsReadyToAttack())
+        {
             return;
+        }
         isCharging = false;
 
         float dist = Vector3.Distance(transform.position, target.position);
@@ -216,31 +224,36 @@ public class SimpleAI : NetworkBehaviour
                 case 1:
                     if (dist <= specialAttackRange)
                     {
+                        Debug.Log("Skill 1");
                         combatUnit.RequestAttack(1);
                         skill_cur_CD = skill_1_CD;
                     }
-                    break;
+                    return;
                 case 2:
                     if (dist > normalAttackRange)
                     {
+                        Debug.Log("Skill 2");
                         combatUnit.RequestAttack(2);
-                        isCharging = true; ;
+                        isCharging = true; 
                         skill_cur_CD = skill_2_CD;
                     }
-                    break;
+                    return;
                 case 3:
                     if (dist <= specialAttackRange)
                     {
+                        Debug.Log("Skill 3");
                         combatUnit.RequestAttack(3);
                         isCharging = true;
                         skill_cur_CD = skill_3_CD;
                     }
-                    break;
+                    return;
             }
         }
-        
-        if(dist <= normalAttackRange)
+        if (dist <= normalAttackRange && attack_cur_CD <= 0)
+        {
             combatUnit.RequestAttack(0);
+            attack_cur_CD = normalAttackCD;
+        }
     }
 
     private void UpdateCooldowns()
@@ -253,5 +266,16 @@ public class SimpleAI : NetworkBehaviour
         {
             dodge_cur_CD -= Time.deltaTime;
         }
+        if(attack_cur_CD > 0)
+        {
+            attack_cur_CD -= Time.deltaTime;
+        }
+    }
+
+    private void StopMove()
+    {
+        Debug.Log("stop move");
+        isActive = false;
+        moveUnit.StopMove();
     }
 }

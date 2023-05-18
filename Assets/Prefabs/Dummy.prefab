@@ -2201,6 +2201,7 @@ GameObject:
   - component: {fileID: 3093214039420382964}
   - component: {fileID: 9045037239641107722}
   - component: {fileID: 8164475605821893328}
+  - component: {fileID: 700498152285452582}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Untagged
@@ -2451,6 +2452,23 @@ MonoBehaviour:
     post_delay: 0
     attackSteps: []
   specialAttack: []
+--- !u!114 &700498152285452582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8109275499739673894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a80a6889fb8ad6b4d80aa6cc834af521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1483431985908610723}
+  _networkObjectCache: {fileID: 0}
+  clientAuthority: 0
+  fallTheshold: -5
 --- !u!1 &8308549380654840745
 GameObject:
   m_ObjectHideFlags: 0

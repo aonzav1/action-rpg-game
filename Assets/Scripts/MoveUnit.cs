@@ -196,5 +196,10 @@ public class MoveUnit : NetworkBehaviour
         return isDodging;
     }
 
+    public void StopMove()
+    {
+        _entity.GetAnim().SetBool("isMoving", false);
+    }
+
 
 }

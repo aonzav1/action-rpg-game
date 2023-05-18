@@ -45,6 +45,7 @@ public class Entity : NetworkBehaviour
     public UnityAction<float> OnHealthChanged;
     public UnityAction<float> OnManaChanged;
     public UnityAction<float> OnStaminaChanged;
+    public UnityAction<float> OnTakeDamage;
 
     public static Entity controllingEntity;
 
@@ -198,8 +199,11 @@ public class Entity : NetworkBehaviour
         _rigidbody.AddForce(force);
         if (isHeavy)
             stunDuration = 2.5f;
+        else
+            stunDuration = 0.5f;
 
         DealForceRpc(base.Owner, force, isHeavy);
+        OnTakeDamage?.Invoke(damage);
 
         hp -= damage;
 
@@ -214,6 +218,8 @@ public class Entity : NetworkBehaviour
         _rigidbody.AddForce(force);
         if(isHeavy)
             stunDuration = 2.5f;
+        else
+            stunDuration = 0.5f;
     }
 
     [ObserversRpc(RunLocally =true)]
@@ -229,6 +235,7 @@ public class Entity : NetworkBehaviour
         }
     }
 
+    [Server]
     private void Die()
     {
         _animator.SetBool("isDie", true);

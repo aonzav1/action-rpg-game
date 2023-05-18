@@ -36,29 +36,39 @@ public class CombatUnit : NetworkBehaviour
     private bool isAttacking;
     private NetworkManager _networkManager;
 
-
     private void Awake()
     {
         _entity = GetComponent<Entity>();
+        _entity.OnTakeDamage += Interrupt;
         _networkManager = InstanceFinder.NetworkManager;
+    }
+
+    private void OnDestroy()
+    {
+        _entity.OnTakeDamage -= Interrupt;
     }
 
     public bool IsReadyToAttack()
     {
         return !isAttacking && _entity.IsControllable();
     }
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAttackRPC(int num)
+    {
+        isAttacking = true;
+        if (num == 0)
+            NormalAttack();
+        else
+            SpecialAttack(num);
+    }
+    [Server]
     public void RequestAttack(int num)
     {
-        isAttacking = true; 
+        isAttacking = true;
         if (num == 0)
-        {
             NormalAttack();
-        }
         else
-        {
             SpecialAttack(num);
-        }
     }
 
 
@@ -89,6 +99,9 @@ public class CombatUnit : NetworkBehaviour
 
         for (int i = 0; i < attack.attackSteps.Length; i++)
         {
+            if (!isAttacking)
+                yield break;
+
             UpdateAttackTransformRotation();
             GameObject toggleObject = attack.attackSteps[i].toggleObject;
             if (toggleObject)
@@ -106,8 +119,11 @@ public class CombatUnit : NetworkBehaviour
         if (attack.toggleObject)
             attack.toggleObject.SetActive(false);
 
+        if (!isAttacking)
+            yield break;
         yield return new WaitForSeconds(attack.post_delay);
 
+        Debug.Log("Set enable attack");
         isAttacking = false;
     }
 
@@ -116,10 +132,15 @@ public class CombatUnit : NetworkBehaviour
         attackTransform.transform.rotation = _entity.GetCharacterTransform().rotation;
     }
 
+    [ObserversRpc(RunLocally = true)]
+    public void Interrupt(float dmg)
+    {
+        isAttacking = false;
+    }
+
     [Server]
     public void SpawnProjectile(GameObject target)
     {
-        Debug.Log("Received spawn projectile");
         NetworkObject nob = _networkManager.GetPooledInstantiated(target, true);
         nob.transform.SetPositionAndRotation(fireTransform.position, fireTransform.rotation);
         nob.GetComponent<Projectile>().SetOwner(_entity);

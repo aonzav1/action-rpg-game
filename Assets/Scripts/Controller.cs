@@ -186,19 +186,19 @@ public class Controller : MonoBehaviour
             return;
         if (Input.GetMouseButtonDown(0))
         {
-            targetCombat.RequestAttack(0);
+            targetCombat.RequestAttackRPC(0);
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            targetCombat.RequestAttack(1);
+            targetCombat.RequestAttackRPC(1);
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            targetCombat.RequestAttack(2);
+            targetCombat.RequestAttackRPC(2);
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            targetCombat.RequestAttack(3);
+            targetCombat.RequestAttackRPC(3);
         }
     }
 
