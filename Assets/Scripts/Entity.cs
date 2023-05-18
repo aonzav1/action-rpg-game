@@ -84,6 +84,8 @@ public class Entity : NetworkBehaviour
     {
         _character.transform.localPosition = new Vector3(0, _character.transform.localPosition.y, 0);
 
+        UpdateHealthGauge();
+
         if (!base.IsOwner)
             return;
 
@@ -103,7 +105,6 @@ public class Entity : NetworkBehaviour
         {
             RegenMana();
         }
-        UpdateHealthGauge();
         UpdateManaGauge();
         UpdateStaminaGauge();
     }
@@ -198,7 +199,7 @@ public class Entity : NetworkBehaviour
         if (isHeavy)
             stunDuration = 2.5f;
 
-        DealForce(base.Owner,force, isHeavy);
+        DealForceRpc(base.Owner, force, isHeavy);
 
         hp -= damage;
 
@@ -208,7 +209,7 @@ public class Entity : NetworkBehaviour
         }
     }
     [TargetRpc]
-    private void DealForce(NetworkConnection conn,Vector3 force, bool isHeavy)
+    private void DealForceRpc(NetworkConnection conn,Vector3 force, bool isHeavy)
     {
         _rigidbody.AddForce(force);
         if(isHeavy)
