@@ -15,6 +15,7 @@ public struct Attack
     public GameObject toggleObject;
     public float pre_delay;
     public float post_delay;
+    public int manaCost;
     public AttackTimeStep[] attackSteps;
 }
 [Serializable]
@@ -58,20 +59,22 @@ public class CombatUnit : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RequestAttackRPC(int num)
     {
-        isAttacking = true;
-        if (num == 0)
-            NormalAttack();
-        else
-            SpecialAttack(num);
+        RequestAttack(num);
     }
     [Server]
     public void RequestAttack(int num)
     {
         isAttacking = true;
         if (num == 0)
-            NormalAttack();
+        {
+            if(_entity.ConsumeMana(normalAttack.manaCost))
+                NormalAttack();
+        }
         else
-            SpecialAttack(num);
+        {
+            if (_entity.ConsumeMana(specialAttack[num-1].manaCost))
+                SpecialAttack(num);
+        }
     }
 
 

@@ -410,7 +410,7 @@ MonoBehaviour:
   _componentIndexCache: 9
   _addedNetworkObject: {fileID: 8901534967370741641}
   _networkObjectCache: {fileID: 8901534967370741641}
-  damage: 25
+  damage: 30
   isHeavy: 0
   entity: {fileID: 2987268795257639448}
   hitForce: 3000
@@ -768,6 +768,7 @@ MonoBehaviour:
     toggleObject: {fileID: 0}
     pre_delay: 0.3
     post_delay: 0.4
+    manaCost: 0
     attackSteps:
     - toggleObject: {fileID: 517148673365022417}
       projectile: {fileID: 0}
@@ -777,6 +778,7 @@ MonoBehaviour:
     toggleObject: {fileID: 0}
     pre_delay: 1
     post_delay: 0.8
+    manaCost: 0
     attackSteps:
     - toggleObject: {fileID: 4266312065490454274}
       projectile: {fileID: 0}
@@ -785,6 +787,7 @@ MonoBehaviour:
     toggleObject: {fileID: 0}
     pre_delay: 0.4
     post_delay: 0.3
+    manaCost: 0
     attackSteps:
     - toggleObject: {fileID: 0}
       projectile: {fileID: 2036512797299145074, guid: 17c47a5c5e681bd45b5aeb83f5d7ed4c,
@@ -794,6 +797,7 @@ MonoBehaviour:
     toggleObject: {fileID: 0}
     pre_delay: 1
     post_delay: 1.2
+    manaCost: 0
     attackSteps:
     - toggleObject: {fileID: 7459946298984623610}
       projectile: {fileID: 0}
@@ -1100,7 +1104,7 @@ MonoBehaviour:
   _componentIndexCache: 10
   _addedNetworkObject: {fileID: 8901534967370741641}
   _networkObjectCache: {fileID: 8901534967370741641}
-  damage: 30
+  damage: 40
   isHeavy: 1
   entity: {fileID: 2987268795257639448}
   hitForce: 10000
