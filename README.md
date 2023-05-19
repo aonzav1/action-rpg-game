@@ -15,6 +15,9 @@ player enter its radius like easy bot but this bot has more attack, very agressi
 Watch demo on youtube:
 https://youtu.be/XDbeiVryDvA
 
+or try the build (Windows)
+https://drive.google.com/drive/folders/1ggmkAJ3XsUvi1PqfFZK3cIBpSv133dkh?usp=sharing
+
 **Tools & packages:**
 - Unity 2022.2.16f start with 3D URP Project.
 - Text Mesh Pro
