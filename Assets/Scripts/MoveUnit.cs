@@ -61,13 +61,15 @@ public class MoveUnit : NetworkBehaviour
             _rigidbody.isKinematic = true;
             return;
         }
+        _rigidbody.isKinematic = false;
 
         _collider.enabled = !isDodging;
-        if (!base.IsOwner && !base.IsServer)
+
+        if ((!_entity.serverAuth && !base.IsOwner) || (_entity.serverAuth && !base.IsServer))
             return;
         _rigidbody.useGravity = !isDodging;
-
         _entity.GetAnim().SetBool("isGrounded", IsGrounded());
+
     }
 
     public void DoMove(Vector3 targetDir)
@@ -131,7 +133,10 @@ public class MoveUnit : NetworkBehaviour
             return;
 
         _rigidbody.AddForce(0, jumpForce, 0);
-        RequestJump();
+        if(!_entity.serverAuth)
+            RequestJump();
+        else
+            ShowJumpAnimation();
     }
 
     [ServerRpc(RequireOwnership =false)]
@@ -164,7 +169,10 @@ public class MoveUnit : NetworkBehaviour
         }
         _rigidbody.velocity = targetDir * dodgeSpeed;
         StartCoroutine(DodgeScenario());
-        RequestDodge();
+        if (!_entity.serverAuth)
+            RequestDodge();
+        else
+            ShowDodgeAnimation();
     }
 
     IEnumerator DodgeScenario()
@@ -174,7 +182,6 @@ public class MoveUnit : NetworkBehaviour
         isDodging = false;
 
         _entity.GetCharacterTransform().localPosition = new Vector3(0, 0, 0);
-
         RemoveForces();
     }
 
@@ -183,9 +190,11 @@ public class MoveUnit : NetworkBehaviour
         _rigidbody.angularVelocity = Vector3.zero;
         _rigidbody.velocity = Vector3.zero;
     }
+
     [ServerRpc(RequireOwnership = false)]
     private void RequestDodge()
     {
+        StartCoroutine(DodgeScenario());
         ShowDodgeAnimation();
     }
 

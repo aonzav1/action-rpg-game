@@ -34,6 +34,10 @@ public class HardAI : BaseAI
 
     private void TryDodge(Vector3 dir)
     {
+        if (target == null || !combatUnit.IsReadyToAttack())
+        {
+            return;
+        }
         if (dodge_cur_CD <= 0)
         {
             float dist = Vector3.Distance(transform.position, target.position);

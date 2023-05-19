@@ -31,6 +31,7 @@ public class EasyAI : BaseAI
     {
         base.Start();
         entity.OnHealthChanged += OnHealthChanged;
+        entity.OnDead += OnDead;
         pointsToReach = runPoints.Count();
     }
 
@@ -73,6 +74,7 @@ public class EasyAI : BaseAI
                 case 2:
                     if (dist <= specialAttackRange)
                     {
+                        Debug.Log(combatUnit.IsReadyToAttack());
                         Debug.Log("Skill 2");
                         combatUnit.RequestAttack(1);
                         SetCharging(true);
@@ -83,6 +85,8 @@ public class EasyAI : BaseAI
         }
         if (dist <= normalAttackRange && attack_cur_CD <= 0)
         {
+            Debug.Log(combatUnit.IsReadyToAttack());
+            Debug.Log("Normal attack");
             combatUnit.RequestAttack(0);
             attack_cur_CD = normalAttackCD;
         }
@@ -106,6 +110,7 @@ public class EasyAI : BaseAI
         combatUnit.OnAttackDone -= OnAttackDone;
         if (!isSuccess)
             return;
+        attack_cur_CD = normalAttackCD;
         JumpBackward();
     }
 
@@ -170,6 +175,12 @@ public class EasyAI : BaseAI
             else
                 target = RandomRunPoint(target);
         }
+    }
+    private void OnDead()
+    {
+        reachedPoint = 0;
+        isRunningAround = false;
+        isHealed = false;
     }
 
 }

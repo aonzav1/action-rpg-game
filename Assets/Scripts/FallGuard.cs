@@ -23,11 +23,11 @@ public class FallGuard : NetworkBehaviour
 
         if (transform.position.y < fallTheshold)
         {
-            ReturnToSpawnPoint();
+            Relocate();
         }
     }
 
-    void ReturnToSpawnPoint()
+    public void Relocate()
     {
         transform.position = spawnPoint;
     }

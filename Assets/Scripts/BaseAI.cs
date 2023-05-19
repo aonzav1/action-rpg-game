@@ -39,7 +39,7 @@ public class BaseAI : NetworkBehaviour
     {
         if (!base.IsServer)
             return;
-        if (!isActive)
+        if (!isActive || entity.IsDie())
             return;
 
         UpdateState();

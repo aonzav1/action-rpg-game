@@ -11,6 +11,7 @@ public enum EntityState { live, dead}
 public class Entity : NetworkBehaviour
 {
     public GameObject _character;
+    public bool serverAuth;
 
     [Header("Stats")]
     [SerializeField] private int maxHP = 100;
@@ -53,6 +54,7 @@ public class Entity : NetworkBehaviour
     public UnityAction<int> OnExpChanged;
     public UnityAction<int> OnMoneyChanged;
     public UnityAction<float> OnTakeDamage;
+    public UnityAction OnDead;
 
     public static Entity controllingEntity;
 
@@ -79,6 +81,11 @@ public class Entity : NetworkBehaviour
     {
         base.OnStartServer();
         SetupInitialStats();
+        if (serverAuth)
+        {
+            ResetStaminaRegenTimer();
+            ResetManaRegenTimer();
+        }
     }
 
     private void SetupInitialStats()
@@ -106,22 +113,27 @@ public class Entity : NetworkBehaviour
             stunDuration -= Time.deltaTime;
         }
 
+        if (base.IsServer)
+        {
+            mpRegenTimer -= Time.deltaTime;
+            if (mpRegenTimer <= 0)
+            {
+                RegenMana();
+            }
+        }
+
         if (!base.IsOwner)
             return;
 
         staminaRegenTimer -= Time.deltaTime;
-        mpRegenTimer -= Time.deltaTime;
 
         if (staminaRegenTimer <= 0)
         {
             RegenStamina();
         }
-        if (mpRegenTimer <= 0)
-        {
-            RegenMana();
-        }
-        UpdateManaGauge();
         UpdateStaminaGauge();
+        UpdateManaGauge();
+
     }
 
 
@@ -147,7 +159,6 @@ public class Entity : NetworkBehaviour
     {
         mpRegenTimer = mpRegenInterval;
     }
-
 
     public bool ConsumeStamina(float amount)
     {
@@ -210,13 +221,19 @@ public class Entity : NetworkBehaviour
         Debug.Log("Get hit: " + damage + " damage by "+attacker.gameObject.name);
         DisplayHitEffect(isHeavy);
 
-        _rigidbody.AddForce(force);
-        if (isHeavy)
-            stunDuration = 2.5f;
+        if (serverAuth)
+        {
+            _rigidbody.AddForce(force);
+            if (isHeavy)
+                stunDuration = 2.5f;
+            else
+                stunDuration = 0.5f;
+        }
         else
-            stunDuration = 0.5f;
+        {
+            DealForceRpc(base.Owner, force, isHeavy);
+        }
 
-        DealForceRpc(base.Owner, force, isHeavy);
         OnTakeDamage?.Invoke(damage);
 
         hp -= damage;
@@ -254,8 +271,12 @@ public class Entity : NetworkBehaviour
     {
         _animator.SetBool("isDie", true);
         _state = EntityState.dead;
+        OnDead?.Invoke();
         
-        attacker.GiveExpAndMoney(attacker.Owner, expDrop, moneyDrop);
+        if(!attacker.serverAuth)
+            attacker.GiveExpAndMoney(attacker.Owner, expDrop, moneyDrop);
+
+        StartCoroutine(Respawn());
     }
 
     [TargetRpc]
@@ -266,6 +287,24 @@ public class Entity : NetworkBehaviour
 
         OnExpChanged?.Invoke(exp);
         OnMoneyChanged?.Invoke(money);
+    }
+
+    private IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(5);
+        _animator.SetBool("isDie", false);
+        _state = EntityState.live;
+        SetupInitialStats();
+
+        if(serverAuth)
+            GetComponent<FallGuard>()?.Relocate();
+        else
+            ForceRelocate(Owner);
+    }
+    [TargetRpc]
+    private void ForceRelocate(NetworkConnection conn)
+    {
+        GetComponent<FallGuard>()?.Relocate();
     }
 
     public bool IsDie()
