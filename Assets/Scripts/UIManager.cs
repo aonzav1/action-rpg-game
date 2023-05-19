@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Image healthBar;
     [SerializeField] private Image manaBar;
     [SerializeField] private Image staminaBar;
+
+    [SerializeField] private TextMeshProUGUI expTxt;
+    [SerializeField] private TextMeshProUGUI moneyTxt;
 
     private CanvasGroup _canvasGroup;
     private Entity _targetEntity;
@@ -33,6 +37,9 @@ public class UIManager : MonoBehaviour
         target.OnHealthChanged += UpdateHPFill;
         target.OnManaChanged += UpdateMPFill;
         target.OnStaminaChanged += UpdateStaminaFill;
+
+        target.OnExpChanged += UpdateExp;
+        target.OnMoneyChanged += UpdateMoney;
     }
 
     public void UpdateHPFill(float value)
@@ -46,5 +53,13 @@ public class UIManager : MonoBehaviour
     public void UpdateStaminaFill(float value)
     {
         staminaBar.fillAmount = value;
+    }
+    public void UpdateExp(int value)
+    {
+        expTxt.text = value.ToString();
+    }
+    public void UpdateMoney(int value)
+    {
+        moneyTxt.text = value.ToString();
     }
 }

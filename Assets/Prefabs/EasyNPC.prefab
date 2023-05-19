@@ -509,6 +509,8 @@ MonoBehaviour:
   maxStamina: 100
   staminaRegenPerTick: 25
   staminaRegenInterval: 3
+  expDrop: 35
+  moneyDrop: 40
   hp: 0
   mp: 0
   stamina: 0

@@ -20,6 +20,8 @@ public class Entity : NetworkBehaviour
     [SerializeField] private int maxStamina = 100;
     [SerializeField] private int staminaRegenPerTick = 25;
     [SerializeField] private float staminaRegenInterval = 3;
+    [SerializeField] private int expDrop;
+    [SerializeField] private int moneyDrop;
 
     [SyncVar]
     private float hp;
@@ -27,6 +29,9 @@ public class Entity : NetworkBehaviour
     private float mp;
     [SyncVar]
     private float stamina;
+
+    private int exp;
+    private int money;
 
     private float _prevHp;
     private float _prevMp;
@@ -45,6 +50,8 @@ public class Entity : NetworkBehaviour
     public UnityAction<float> OnHealthChanged;
     public UnityAction<float> OnManaChanged;
     public UnityAction<float> OnStaminaChanged;
+    public UnityAction<int> OnExpChanged;
+    public UnityAction<int> OnMoneyChanged;
     public UnityAction<float> OnTakeDamage;
 
     public static Entity controllingEntity;
@@ -79,6 +86,8 @@ public class Entity : NetworkBehaviour
         hp = maxHP;
         mp = maxMP;
         stamina = maxStamina;
+        exp = 0;
+        money = 0;
     }
 
     public void RestoreHealth()
@@ -214,7 +223,7 @@ public class Entity : NetworkBehaviour
 
         if (hp <= 0)
         {
-            Die();
+            Die(attacker);
         }
     }
     [TargetRpc]
@@ -241,10 +250,22 @@ public class Entity : NetworkBehaviour
     }
 
     [Server]
-    private void Die()
+    private void Die(Entity attacker)
     {
         _animator.SetBool("isDie", true);
         _state = EntityState.dead;
+        
+        attacker.GiveExpAndMoney(attacker.Owner, expDrop, moneyDrop);
+    }
+
+    [TargetRpc]
+    private void GiveExpAndMoney(NetworkConnection conn, int addedExp, int addedMoney)
+    {
+        exp += addedExp;
+        money += addedMoney;
+
+        OnExpChanged?.Invoke(exp);
+        OnMoneyChanged?.Invoke(money);
     }
 
     public bool IsDie()

@@ -2249,6 +2249,8 @@ MonoBehaviour:
   maxStamina: 100
   staminaRegenPerTick: 25
   staminaRegenInterval: 3
+  expDrop: 10
+  moneyDrop: 12
   hp: 0
   mp: 0
   stamina: 0
@@ -2274,6 +2276,7 @@ MonoBehaviour:
   - {fileID: 3512941918838595281}
   - {fileID: 9045037239641107722}
   - {fileID: 8164475605821893328}
+  - {fileID: 700498152285452582}
   - {fileID: 5775289380096932201}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
@@ -2464,9 +2467,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a80a6889fb8ad6b4d80aa6cc834af521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 5
   _addedNetworkObject: {fileID: 1483431985908610723}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 1483431985908610723}
   clientAuthority: 0
   fallTheshold: -5
 --- !u!1 &8308549380654840745
@@ -2664,7 +2667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 5
+  _componentIndexCache: 6
   _addedNetworkObject: {fileID: 1483431985908610723}
   _networkObjectCache: {fileID: 1483431985908610723}
   _componentConfiguration: 0
