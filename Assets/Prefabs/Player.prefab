@@ -218,6 +218,8 @@ MonoBehaviour:
   maxStamina: 100
   staminaRegenPerTick: 15
   staminaRegenInterval: 1.25
+  expDrop: 0
+  moneyDrop: 0
   hp: 0
   mp: 0
   stamina: 0
@@ -274,11 +276,11 @@ MonoBehaviour:
   - attackName: Dragon's tail
     toggleObject: {fileID: 0}
     pre_delay: 1
-    post_delay: 0.3
+    post_delay: 0.8
     attackSteps:
     - toggleObject: {fileID: 8651470222231641917}
       projectile: {fileID: 0}
-      duration: 1
+      duration: 0.5
   - attackName: Wind slash
     toggleObject: {fileID: 0}
     pre_delay: 0.4
@@ -291,11 +293,11 @@ MonoBehaviour:
   - attackName: Earth quake
     toggleObject: {fileID: 0}
     pre_delay: 1
-    post_delay: 0.5
+    post_delay: 0.7
     attackSteps:
     - toggleObject: {fileID: 4669743016463122884}
       projectile: {fileID: 0}
-      duration: 0.7
+      duration: 0.5
 --- !u!54 &4896078787195570009
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -361,6 +363,7 @@ MonoBehaviour:
   _componentIndexCache: 5
   _addedNetworkObject: {fileID: 1698756452518888389}
   _networkObjectCache: {fileID: 1698756452518888389}
+  clientAuthority: 1
   fallTheshold: -5
 --- !u!1 &4669743016463122884
 GameObject:
@@ -483,10 +486,10 @@ MonoBehaviour:
   _componentIndexCache: 9
   _addedNetworkObject: {fileID: 1698756452518888389}
   _networkObjectCache: {fileID: 1698756452518888389}
-  damage: 25
+  damage: 30
   isHeavy: 1
   entity: {fileID: 7937346359914476880}
-  hitForce: 12000
+  hitForce: 10000
   calculateForceFromBoxOrigin: 0
 --- !u!1 &5236659420124298757
 GameObject:
@@ -609,7 +612,7 @@ MonoBehaviour:
   _componentIndexCache: 7
   _addedNetworkObject: {fileID: 1698756452518888389}
   _networkObjectCache: {fileID: 1698756452518888389}
-  damage: 25
+  damage: 15
   isHeavy: 0
   entity: {fileID: 7937346359914476880}
   hitForce: 2000
@@ -766,7 +769,7 @@ MonoBehaviour:
   _componentIndexCache: 8
   _addedNetworkObject: {fileID: 1698756452518888389}
   _networkObjectCache: {fileID: 1698756452518888389}
-  damage: 20
+  damage: 25
   isHeavy: 0
   entity: {fileID: 7937346359914476880}
   hitForce: 3000

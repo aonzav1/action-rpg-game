@@ -18,6 +18,9 @@ public class HitBox : NetworkBehaviour
 
     public void OnTriggerStay(Collider other)
     {
+        if (other.isTrigger)
+            return;
+
         Entity en = other.GetComponent<Entity>();
 
         if (en == null)

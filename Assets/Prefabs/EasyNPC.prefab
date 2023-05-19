@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 766434149023452543}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.25, z: 1.315}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_LocalScale: {x: 4.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4571485461774012645}
@@ -121,10 +121,10 @@ MonoBehaviour:
   _componentIndexCache: 10
   _addedNetworkObject: {fileID: 5617898099552352056}
   _networkObjectCache: {fileID: 5617898099552352056}
-  damage: 25
-  isHeavy: 1
+  damage: 30
+  isHeavy: 0
   entity: {fileID: 4140403615734194965}
-  hitForce: 12000
+  hitForce: 5000
   calculateForceFromBoxOrigin: 0
 --- !u!1 &817918113311254235
 GameObject:
@@ -502,7 +502,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 5617898099552352056}
   _networkObjectCache: {fileID: 5617898099552352056}
   _character: {fileID: 5671584175494674525}
-  maxHP: 200
+  maxHP: 120
   maxMP: 100
   mpRegenPerTick: 40
   mpRegenInterval: 5
@@ -727,11 +727,11 @@ MonoBehaviour:
   - attackName: Earth quake
     toggleObject: {fileID: 0}
     pre_delay: 1
-    post_delay: 1
+    post_delay: 1.2
     attackSteps:
     - toggleObject: {fileID: 766434149023452543}
       projectile: {fileID: 0}
-      duration: 0.7
+      duration: 0.5
 --- !u!135 &3053148504532815463
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -788,14 +788,18 @@ MonoBehaviour:
   target: {fileID: 0}
   detected: {fileID: 0}
   eyeSight: 30
-  detectionRange: 20
-  eyePosition: {x: 0, y: 1.8, z: 0}
-  maxKnittingTime: 3
+  detectionRange: 15
+  eyePosition: {x: 0, y: 1.5, z: 0}
+  deactivateTime: 5
+  maxKnittingTime: 1.25
+  moveUnit: {fileID: 0}
+  combatUnit: {fileID: 0}
+  entity: {fileID: 0}
   normalAttackRange: 2
-  normalAttackCD: 2.5
+  normalAttackCD: 2.25
   specialAttackRange: 3.5
-  skill_1_CD: 5
-  skill_2_CD: 2
+  skill_1_CD: 2
+  skill_2_CD: 4
   runTriggerHPPercent: 0.2
   runPoints: []
   healTriggerHPPercent: 0.5

@@ -54,6 +54,9 @@ public class Projectile : NetworkBehaviour
         if (!base.IsServer)
             return;
 
+        if (collision.collider.isTrigger)
+            return;
+
         Entity en = collision.gameObject.GetComponent<Entity>();
 
         if (en != null)
@@ -72,6 +75,9 @@ public class Projectile : NetworkBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!base.IsServer)
+            return;
+
+        if (other.isTrigger)
             return;
 
         Entity en = other.GetComponent<Entity>();
