@@ -72,6 +72,9 @@ public class Controller : MonoBehaviour
                 Cursor.lockState = CursorLockMode.None;
         }
 
+        if(Cursor.lockState == CursorLockMode.None)
+            return; 
+
         RelocateCamera();
         ManageAttack();
         ManageJump();

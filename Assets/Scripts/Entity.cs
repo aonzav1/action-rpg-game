@@ -269,7 +269,11 @@ public class Entity : NetworkBehaviour
     [Server]
     private void Die(Entity attacker)
     {
-        _animator.SetBool("isDie", true);
+        if (serverAuth)
+            _animator.SetBool("isDie", true);
+        else
+            ShowDeadAnimation(base.Owner);
+
         _state = EntityState.dead;
         OnDead?.Invoke();
         
@@ -277,6 +281,12 @@ public class Entity : NetworkBehaviour
             attacker.GiveExpAndMoney(attacker.Owner, expDrop, moneyDrop);
 
         StartCoroutine(Respawn());
+    }
+    [TargetRpc]
+    private void ShowDeadAnimation(NetworkConnection conn)
+    {
+        _animator.SetBool("isDie", true);
+        _state = EntityState.dead;
     }
 
     [TargetRpc]
@@ -292,18 +302,21 @@ public class Entity : NetworkBehaviour
     private IEnumerator Respawn()
     {
         yield return new WaitForSeconds(5);
-        _animator.SetBool("isDie", false);
         _state = EntityState.live;
         SetupInitialStats();
 
-        if(serverAuth)
+        if (serverAuth)
+        {
+            _animator.SetBool("isDie", false);
             GetComponent<FallGuard>()?.Relocate();
+        }
         else
             ForceRelocate(Owner);
     }
     [TargetRpc]
     private void ForceRelocate(NetworkConnection conn)
     {
+        _animator.SetBool("isDie", false);
         GetComponent<FallGuard>()?.Relocate();
     }
 

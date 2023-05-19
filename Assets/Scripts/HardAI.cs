@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using FishNet.Object;
+using Unity.VisualScripting;
 
 public class HardAI : BaseAI
 {
@@ -16,6 +17,11 @@ public class HardAI : BaseAI
     private float attack_cur_CD;
     private float skill_cur_CD;
     private float dodge_cur_CD;
+
+    public override void Start()
+    {
+        base.Start();
+    }
 
     public override void UpdateState()
     {

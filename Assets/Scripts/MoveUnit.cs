@@ -1,6 +1,7 @@
 using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Net.NetworkInformation;
 using TMPro;
 using UnityEngine;
@@ -61,15 +62,25 @@ public class MoveUnit : NetworkBehaviour
             _rigidbody.isKinematic = true;
             return;
         }
-        _rigidbody.isKinematic = false;
-
         _collider.enabled = !isDodging;
 
-        if ((!_entity.serverAuth && !base.IsOwner) || (_entity.serverAuth && !base.IsServer))
+        if (!IsAuthorized())
+        {
+            _rigidbody.isKinematic = true;
             return;
+        }
+        _rigidbody.isKinematic = false;
         _rigidbody.useGravity = !isDodging;
         _entity.GetAnim().SetBool("isGrounded", IsGrounded());
+    }
 
+    public bool IsAuthorized()
+    {
+        if(_entity.serverAuth && base.IsServer)
+            return true;
+        if (!_entity.serverAuth && base.IsOwner)
+            return true;
+        return false;
     }
 
     public void DoMove(Vector3 targetDir)

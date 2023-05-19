@@ -158,7 +158,7 @@ MonoBehaviour:
   _animator: {fileID: 2794305807466970275}
   _smoothFloats: 1
   _interpolation: 2
-  _clientAuthoritative: 0
+  _clientAuthoritative: 1
   _sendToOwner: 1
 --- !u!114 &143808384823473383
 MonoBehaviour:
@@ -176,6 +176,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 7955735124168847323}
   _networkObjectCache: {fileID: 7955735124168847323}
   _character: {fileID: 8554221877651456784}
+  serverAuth: 0
   maxHP: 100
   maxMP: 100
   mpRegenPerTick: 10

@@ -147,9 +147,8 @@ public class EasyAI : BaseAI
         target = RandomRunPoint();
     }
 
-    private Transform RandomRunPoint(Transform remove=null)
+    private Transform RandomRunPoint()
     {
-        runPoints.Remove(remove);
         return runPoints[Random.Range(0, runPoints.Count)];
     }
 
@@ -173,7 +172,7 @@ public class EasyAI : BaseAI
             if (reachedPoint == pointsToReach)
                 target = SeekNewTarget();
             else
-                target = RandomRunPoint(target);
+                target = RandomRunPoint();
         }
     }
     private void OnDead()
