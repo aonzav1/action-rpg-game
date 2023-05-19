@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 [Serializable]
 public struct Attack
@@ -35,6 +36,8 @@ public class CombatUnit : NetworkBehaviour
     private Entity _entity;
     private bool isAttacking;
     private NetworkManager _networkManager;
+
+    public UnityAction<bool> OnAttackDone;
 
     private void Awake()
     {
@@ -99,8 +102,12 @@ public class CombatUnit : NetworkBehaviour
 
         for (int i = 0; i < attack.attackSteps.Length; i++)
         {
+
             if (!isAttacking)
+            {
+                OnAttackDone?.Invoke(false);
                 yield break;
+            }
 
             UpdateAttackTransformRotation();
             GameObject toggleObject = attack.attackSteps[i].toggleObject;
@@ -120,11 +127,16 @@ public class CombatUnit : NetworkBehaviour
             attack.toggleObject.SetActive(false);
 
         if (!isAttacking)
+        {
+            OnAttackDone?.Invoke(false);
             yield break;
+        }
         yield return new WaitForSeconds(attack.post_delay);
 
         Debug.Log("Set enable attack");
         isAttacking = false;
+
+        OnAttackDone?.Invoke(true);
     }
 
     private void UpdateAttackTransformRotation()

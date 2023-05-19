@@ -81,6 +81,11 @@ public class Entity : NetworkBehaviour
         stamina = maxStamina;
     }
 
+    public void RestoreHealth()
+    {
+        hp = maxHP;
+    }
+
     private void Update()
     {
         _character.transform.localPosition = new Vector3(0, _character.transform.localPosition.y, 0);

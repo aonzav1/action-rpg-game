@@ -46,6 +46,10 @@ public class MoveUnit : NetworkBehaviour
         _entity = GetComponent<Entity>();
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
+
+        Vector3 newVector = transform.localEulerAngles;
+        _entity._character.transform.localEulerAngles = newVector;
+        transform.eulerAngles = Vector3.zero ;
     }
 
     private void Update()

@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using FishNet.Object;
+using System.Linq;
 
 [RequireComponent(typeof(SphereCollider))]
-public class SimpleAI : NetworkBehaviour
+public class EasyAI : NetworkBehaviour
 {
     [Header("Detection")]
     [SerializeField] private Transform target;
@@ -22,14 +23,22 @@ public class SimpleAI : NetworkBehaviour
     [SerializeField] private float specialAttackRange;
     [SerializeField] private float skill_1_CD;
     [SerializeField] private float skill_2_CD;
-    [SerializeField] private float skill_3_CD;
-    [SerializeField] private float dodge_CD;
     private float attack_cur_CD;
     private float skill_cur_CD;
-    private float dodge_cur_CD;
 
     private bool isActive;
     private bool isCharging;
+    private bool isRunningAround;
+    private int reachedPoint;
+    private int pointsToReach;
+
+    [Header("For running around mechanic")]
+    [SerializeField] private float runTriggerHPPercent = 0.2f;
+    [SerializeField] private List<Transform> runPoints;
+
+    [Header("For 50% heal mechanic")]
+    [SerializeField] private float healTriggerHPPercent = 0.5f;
+    private bool isHealed;
 
     MoveUnit moveUnit;
     CombatUnit combatUnit;
@@ -40,6 +49,8 @@ public class SimpleAI : NetworkBehaviour
         entity = GetComponent<Entity>();
         moveUnit = GetComponent<MoveUnit>();
         combatUnit = GetComponent<CombatUnit>();
+        entity.OnHealthChanged += OnHealthChanged;
+        pointsToReach = runPoints.Count();
     }
 
     private void Update()
@@ -48,6 +59,11 @@ public class SimpleAI : NetworkBehaviour
             return;
         if (!isActive)
             return;
+        if (isRunningAround && reachedPoint != pointsToReach)
+        {
+            HandleReachPoint();
+            return;
+        }
 
         detected = DetectForward();
 
@@ -167,44 +183,8 @@ public class SimpleAI : NetworkBehaviour
         }
    
         moveUnit.DoMove(dir);
-        TryDodge(dir);
     }
 
-    private void TryDodge(Vector3 dir)
-    {
-        if (dodge_cur_CD <= 0)
-        {
-            float dist = Vector3.Distance(transform.position, target.position);
-            dodge_cur_CD = 1f;
-            int r = Random.Range(0, 4);
-            if (r == 0 && dist >= normalAttackRange && skill_cur_CD < 1)
-            {
-                Debug.Log("Dodge forward");
-                moveUnit.DoDodge(dir);
-                dodge_cur_CD = dodge_CD;
-            }
-            else if (target.GetComponent<CombatUnit>().IsAttacking() && dist <= specialAttackRange)
-            {
-                if (r == 1)
-                {
-                    Debug.Log("Dodge backward");
-                    moveUnit.DoDodge(-dir);
-                }else if (r == 2)
-                {
-                    Debug.Log("Dodge left");
-                    Vector3 rotatedVector = Quaternion.AngleAxis(90, Vector3.left) * dir;
-                    moveUnit.DoDodge(rotatedVector);
-                }
-                else if (r == 3)
-                {
-                    Debug.Log("Dodge right");
-                    Vector3 rotatedVector = Quaternion.AngleAxis(-90, Vector3.left) * dir;
-                    moveUnit.DoDodge(rotatedVector);
-                }
-                dodge_cur_CD = dodge_CD;
-            }
-        }
-    }
 
     private void TryAttackPlayer()
     {
@@ -223,29 +203,21 @@ public class SimpleAI : NetworkBehaviour
             switch (r)
             {
                 case 1:
-                    if (dist <= specialAttackRange)
+                    if (dist <= normalAttackRange)
                     {
                         Debug.Log("Skill 1");
-                        combatUnit.RequestAttack(1);
+                        combatUnit.OnAttackDone += OnAttackDone;
+                        combatUnit.RequestAttack(0);
                         skill_cur_CD = skill_1_CD;
                     }
                     return;
                 case 2:
-                    if (dist > normalAttackRange)
-                    {
-                        Debug.Log("Skill 2");
-                        combatUnit.RequestAttack(2);
-                        isCharging = true; 
-                        skill_cur_CD = skill_2_CD;
-                    }
-                    return;
-                case 3:
                     if (dist <= specialAttackRange)
                     {
-                        Debug.Log("Skill 3");
-                        combatUnit.RequestAttack(3);
-                        isCharging = true;
-                        skill_cur_CD = skill_3_CD;
+                        Debug.Log("Skill 2");
+                        combatUnit.RequestAttack(1);
+                        isCharging = true; 
+                        skill_cur_CD = skill_2_CD;
                     }
                     return;
             }
@@ -263,14 +235,32 @@ public class SimpleAI : NetworkBehaviour
         {
             skill_cur_CD -= Time.deltaTime;
         }
-        if(dodge_cur_CD > 0)
-        {
-            dodge_cur_CD -= Time.deltaTime;
-        }
         if(attack_cur_CD > 0)
         {
             attack_cur_CD -= Time.deltaTime;
         }
+    }
+
+    private void OnAttackDone(bool isSuccess)
+    {
+        Debug.Log("OnAttackdone");
+        combatUnit.OnAttackDone -= OnAttackDone;
+        if (!isSuccess)
+            return;
+        JumpBackward();
+    }
+
+    private void JumpBackward()
+    {
+        Debug.Log("Jumpback");
+        if (target == null)
+            return;
+        Vector3 dir = target.transform.position - transform.position;
+        dir = dir.normalized;
+        dir.y = 0;
+        dir = Vector3.ClampMagnitude(dir, 1);
+
+        moveUnit.DoDodge(-dir);
     }
 
     private void StopMove()
@@ -278,5 +268,55 @@ public class SimpleAI : NetworkBehaviour
         Debug.Log("stop move");
         isActive = false;
         moveUnit.StopMove();
+    }
+
+    private void OnHealthChanged(float percent)
+    {
+        if(percent <= healTriggerHPPercent)
+        {
+            SecondLife();
+        }
+        if (percent <= runTriggerHPPercent)
+        {
+            RunAround();
+        }
+    }
+
+    private void RunAround()
+    {
+        if (isRunningAround)
+            return;
+        isRunningAround = true;
+        target = RandomRunPoint();
+    }
+
+    private Transform RandomRunPoint(Transform remove=null)
+    {
+        runPoints.Remove(remove);
+        return runPoints[Random.Range(0, runPoints.Count)];
+    }
+
+    private void SecondLife()
+    {
+        if (isHealed)
+            return;
+        Debug.Log("SECOND LIFE");
+        isHealed = true;
+        moveUnit.DoJump();
+        entity.RestoreHealth();
+    }
+
+    private void HandleReachPoint()
+    {
+        float dist = Vector3.Distance(transform.position, target.position);
+        if (dist < 0.1f)
+        {
+            Debug.Log("Point reach");
+            reachedPoint += 1;
+            if (reachedPoint == pointsToReach)
+                target = SeekNewTarget();
+            else
+                target = RandomRunPoint(target);
+        }
     }
 }
